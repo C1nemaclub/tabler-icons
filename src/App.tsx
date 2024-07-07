@@ -1,154 +1,242 @@
-import * as icons from '@tabler/icons';
 import {
+  Autocomplete,
+  Box,
   Container,
+  Grid,
+  IconButton,
+  InputAdornment,
+  ListItem,
+  ListItemText,
+  Pagination,
+  Snackbar,
   Stack,
   TextField,
-  Typography,
-  Grid,
   Tooltip,
-  Box,
+  Typography,
 } from '@mui/material';
-import './App.css';
+import * as tablerIcons from '@tabler/icons-react';
+import * as tablerIconsVanilla from '@tabler/icons';
+import { IconX } from '@tabler/icons-react';
 import { useDebounce } from '@uidotdev/usehooks';
 import React, { useState } from 'react';
-import { FixedSizeGrid } from 'react-window';
+import ReactIconsGrid from './components/ReactIconsGrid';
+import VanillaIconsGrid from './components/VanillaIconsGrid';
+import './App.css';
 
-const Cell = ({ columnIndex, rowIndex, style, data }) => {
-  const iconName = data.icons[rowIndex];
-  const Icon = icons[iconName];
-  return (
-    <Stack
-      style={style}
-      alignItems='center'
-      justifyContent='center'
-      onClick={() => data.onClick(iconName)}
-      gap={1}
-      sx={{
-        cursor: 'pointer',
-        boxShadow: 1,
-        borderRadius: 1,
-        padding: 2,
-        bgcolor: 'background.paper',
-      }}>
-      <Tooltip
-        title='Click to copy'
-        placement='top'
-        arrow
-        key={iconName}
-        enterDelay={200}
-        leaveDelay={200}>
-        <Box>
-          <Icon size={40} />
-        </Box>
-      </Tooltip>
-      <Typography
-        variant='caption'
-        sx={{ textAlign: 'center' }}
-        fontSize={12}
-        noWrap>
-        {iconName}
-      </Typography>
-    </Stack>
-  );
-};
+const ITEMS_PER_PAGE = 25;
+
+const libOptions = [
+  {
+    name: 'Vanilla',
+    version: '1.119.0',
+  },
+  {
+    name: 'React',
+    version: '2.14.0',
+  },
+];
 
 function App() {
   const [search, setSearch] = useState('');
+  const [page, setPage] = useState(1);
+  const [openSnack, setOpenSnack] = useState(false);
+  const [snackMessage, setSnackMessage] = useState('');
+  const [activeLibrary, setActiveLibrary] = useState({
+    name: 'Vanilla',
+    version: '1.119.0',
+  });
   const debouncedSearchTerm = useDebounce(search, 300);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(e.target.value);
+    setPage(1);
   };
 
   const handleCopy = (iconName: string) => {
-    console.log(iconName);
+    setOpenSnack(false);
+    setSnackMessage(`Copied: ${iconName}`);
+    setOpenSnack(true);
+    navigator.clipboard.writeText(iconName);
+    setTimeout(() => {
+      setOpenSnack(false);
+      setSnackMessage('');
+    }, 450);
   };
 
-  const allIcons = Object.keys(icons);
-  const filteredIcons = allIcons.filter((iconName) => {
+  const handleClose = () => {
+    setOpenSnack(false);
+    setSnackMessage('');
+  };
+
+  const TablerIcons = Object.keys(
+    activeLibrary.name === 'Vanilla' ? tablerIconsVanilla : tablerIcons
+  );
+
+  const filteredIcons = TablerIcons.filter((iconName) => {
     return iconName.toLowerCase().includes(debouncedSearchTerm.toLowerCase());
   });
-  const iconCount = filteredIcons.length;
 
-  const gridData = {
-    icons: filteredIcons,
-    onClick: handleCopy,
-  };
+  const iconCount = filteredIcons.length - 1;
+
+  const paginatedIcons = filteredIcons.slice(
+    (page - 1) * ITEMS_PER_PAGE,
+    page * ITEMS_PER_PAGE
+  );
 
   return (
-    <>
-      <Container
-        maxWidth='md'
-        sx={{
-          padding: 4,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-        }}>
-        <Typography variant='h4'>Tabler Icons</Typography>
-
-        <Grid container columns={12} mt={4}>
-          <Grid item xs={12}>
-            <TextField
-              size='small'
-              variant='outlined'
-              fullWidth
-              label='Search...'
-              value={search}
-              onChange={handleSearch}
-            />
-          </Grid>
-          <Grid item xs={12} mt={4}>
-            <FixedSizeGrid
-              columnCount={4}
-              columnWidth={200}
-              height={650}
-              rowCount={iconCount / 4}
-              rowHeight={120}
-              width={850}
-              // itemData={filteredIcons}
-              itemData={gridData}>
-              {Cell}
-            </FixedSizeGrid>
-            {/* <Stack
+    <Container
+      maxWidth='md'
+      sx={{
+        padding: 2,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+      }}>
+      <Typography variant='h4'>Tabler Icons</Typography>
+      {
+        <Typography variant='body1' sx={{ textAlign: 'center' }}>
+          {`Total ${iconCount} icons`}
+        </Typography>
+      }
+      {tablerIcons && (
+        <Typography variant='caption' sx={{ textAlign: 'center' }}>
+          {`Version: ${activeLibrary.version}`}
+        </Typography>
+      )}
+      <Grid container columns={12} mt={4} columnSpacing={2}>
+        <Grid item xs={3}>
+          <Autocomplete
+            options={libOptions}
+            size='small'
+            value={activeLibrary}
+            isOptionEqualToValue={(option, value) => option.name === value.name}
+            getOptionLabel={(option) => option.name}
+            renderOption={(props, option) => {
+              return (
+                <ListItem {...props} key={option.name} disablePadding>
+                  <ListItemText
+                    primary={option.name}
+                    secondary={option.version}
+                  />
+                </ListItem>
+              );
+            }}
+            onChange={(_, value) => {
+              if (!value) return;
+              setPage(1);
+              setActiveLibrary(value);
+            }}
+            renderInput={(params) => {
+              return (
+                <TextField
+                  {...params}
+                  name='library'
+                  label='Library'
+                  variant='outlined'
+                />
+              );
+            }}
+          />
+        </Grid>
+        <Grid item xs={9}>
+          <TextField
+            size='small'
+            variant='outlined'
+            fullWidth
+            label='Search...'
+            value={search}
+            onChange={handleSearch}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position='start'>
+                  <Tooltip title='Clear'>
+                    <IconButton
+                      onClick={() => {
+                        setSearch('');
+                        setPage(1);
+                      }}
+                      size='small'>
+                      <IconX size={22} />
+                    </IconButton>
+                  </Tooltip>
+                </InputAdornment>
+              ),
+            }}
+          />
+        </Grid>
+        <Grid item xs={12} my={2}>
+          {iconCount > 0 ? (
+            <Stack
               gap={2}
               direction='row'
               justifyContent='center'
               alignItems='center'
-              flexWrap='wrap'>
-              {filteredIcons.map((iconName) => {
-                const Icon = icons[iconName];
-                return (
-                  <Stack
-                    alignItems='center'
-                    justifyContent='center'
-                    key={iconName}
-                    gap={1}
-                    width={'150px'}
-                    onClick={() => handleCopy(iconName)}
-                    sx={{
-                      cursor: 'pointer',
-                      boxShadow: 1,
-                      borderRadius: 1,
-                      padding: 2,
-                      bgcolor: 'background.paper',
-                    }}>
-                    <Icon size={40} />
-                    <Typography
-                      variant='caption'
-                      sx={{ textAlign: 'center' }}
-                      fontSize={12}
-                      noWrap>
-                      {iconName}
-                    </Typography>
-                  </Stack>
-                );
-              })}
-            </Stack> */}
-          </Grid>
+              flexWrap='wrap'
+              width='100%'>
+              <>
+                {activeLibrary.name === 'Vanilla' ? (
+                  <VanillaIconsGrid
+                    paginatedIcons={paginatedIcons}
+                    tablerIcons={tablerIconsVanilla}
+                    handleCopy={handleCopy}
+                  />
+                ) : (
+                  <ReactIconsGrid
+                    paginatedIcons={paginatedIcons}
+                    tablerIcons={tablerIcons}
+                    handleCopy={handleCopy}
+                  />
+                )}
+              </>
+            </Stack>
+          ) : (
+            <Typography
+              variant='h4'
+              sx={{ textAlign: 'center', width: '100%' }}
+              mt={2}
+              fontSize={18}>
+              No icons found for "{debouncedSearchTerm}"
+            </Typography>
+          )}
         </Grid>
-      </Container>
-    </>
+        <Grid item xs={12} mt={2}>
+          {paginatedIcons.length > 0 && (
+            <Box display='flex' justifyContent='center' alignItems='center'>
+              <Pagination
+                color='primary'
+                size='large'
+                page={page}
+                count={Math.ceil(iconCount / ITEMS_PER_PAGE)}
+                variant='outlined'
+                shape='rounded'
+                onChange={(_, value) => setPage(value)}
+                siblingCount={2}
+                boundaryCount={3}
+              />
+            </Box>
+          )}
+        </Grid>
+      </Grid>
+      <Box sx={{ width: 500 }}>
+        <Snackbar
+          anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+          open={openSnack}
+          onClose={handleClose}
+          message={
+            snackMessage && (
+              <Stack
+                direction='row'
+                gap={2}
+                alignItems='center'
+                justifyContent='center'>
+                <tablerIcons.IconCheck size={24} />
+                <Typography>{snackMessage}</Typography>
+              </Stack>
+            )
+          }
+        />
+      </Box>
+    </Container>
   );
 }
 

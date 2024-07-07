@@ -75,8 +75,7 @@ function App() {
   const filteredIcons = TablerIcons.filter((iconName) => {
     return iconName.toLowerCase().includes(debouncedSearchTerm.toLowerCase());
   });
-  const subtractNumber = activeLibrary.name === 'Vanilla' ? 0 : 1;
-  const iconCount = filteredIcons.length - subtractNumber;
+  const iconCount = filteredIcons.length;
 
   const paginatedIcons = filteredIcons.slice(
     (page - 1) * ITEMS_PER_PAGE,

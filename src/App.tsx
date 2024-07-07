@@ -1,10 +1,12 @@
 import {
   Autocomplete,
+  Avatar,
   Box,
   Container,
   Grid,
   IconButton,
   InputAdornment,
+  Link,
   ListItem,
   ListItemText,
   Pagination,
@@ -104,7 +106,7 @@ function App() {
         </Typography>
       )}
       <Grid container columns={12} mt={4} columnSpacing={2}>
-        <Grid item xs={3}>
+        <Grid item xs={12} md={3} mb={2}>
           <Autocomplete
             options={libOptions}
             size='small'
@@ -138,7 +140,7 @@ function App() {
             }}
           />
         </Grid>
-        <Grid item xs={9}>
+        <Grid item xs={12} md={9}>
           <TextField
             size='small'
             variant='outlined'
@@ -236,6 +238,20 @@ function App() {
           }
         />
       </Box>
+      <Link
+        href='https://github.com/C1nemaclub/r3f-waves-glsl'
+        target='_blank'
+        rel='noopener noreferrer'
+        color='inherit'>
+        <IconButton
+          sx={{
+            position: 'fixed',
+            bottom: 20,
+            right: 30,
+          }}>
+          <tablerIcons.IconBrandGithub size={40} />
+        </IconButton>
+      </Link>
     </Container>
   );
 }

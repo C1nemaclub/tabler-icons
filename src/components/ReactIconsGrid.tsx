@@ -33,6 +33,7 @@ const ReactIconsGrid: FC<ReactIconsGridProps> = ({
             key={iconName}
             gap={1}
             flexGrow={1}
+            maxWidth={'300px'}
             width={'150px'}
             onClick={() => handleCopy(iconName)}
             sx={{
@@ -41,6 +42,11 @@ const ReactIconsGrid: FC<ReactIconsGridProps> = ({
               borderRadius: 1,
               padding: 2,
               bgcolor: 'background.paper',
+              transition: 'all 0.1s',
+              '&:hover': {
+                bgcolor: 'background.default',
+                boxShadow: 4,
+              },
             }}>
             <Icon key={iconName} size={40} />
             <Typography

@@ -1,6 +1,5 @@
 import {
   Autocomplete,
-  Avatar,
   Box,
   Container,
   Grid,
@@ -16,14 +15,13 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
-import * as tablerIcons from '@tabler/icons-react';
 import * as tablerIconsVanilla from '@tabler/icons';
+import * as tablerIcons from '@tabler/icons-react';
 import { IconX } from '@tabler/icons-react';
 import { useDebounce } from '@uidotdev/usehooks';
 import React, { useState } from 'react';
 import ReactIconsGrid from './components/ReactIconsGrid';
 import VanillaIconsGrid from './components/VanillaIconsGrid';
-import './App.css';
 
 const ITEMS_PER_PAGE = 25;
 
@@ -239,7 +237,7 @@ function App() {
         />
       </Box>
       <Link
-        href='https://github.com/C1nemaclub/r3f-waves-glsl'
+        href='https://github.com/C1nemaclub/tabler-icons'
         target='_blank'
         rel='noopener noreferrer'
         color='inherit'>

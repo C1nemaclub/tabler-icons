@@ -19,9 +19,9 @@ import * as tablerIconsVanilla from '@tabler/icons';
 import * as tablerIcons from '@tabler/icons-react';
 import { IconX } from '@tabler/icons-react';
 import { useDebounce } from '@uidotdev/usehooks';
-import React, { useState } from 'react';
-import ReactIconsGrid from './components/ReactIconsGrid';
-import VanillaIconsGrid from './components/VanillaIconsGrid';
+import React, { useMemo, useState } from 'react';
+import Fuse, { FuseResult } from 'fuse.js';
+import IconGrid from "./components/IconGrid";
 
 const ITEMS_PER_PAGE = 25;
 
@@ -72,12 +72,23 @@ function App() {
     activeLibrary.name === 'Vanilla' ? tablerIconsVanilla : tablerIcons
   );
 
-  const filteredIcons = TablerIcons.filter((iconName) => {
-    return iconName.toLowerCase().includes(debouncedSearchTerm.toLowerCase());
-  });
-  const iconCount = filteredIcons.length;
+  const fuse = useMemo(()=> {
+    return new Fuse(TablerIcons, {
+      includeScore: true,
+      threshold: 0.25,
+      keys: ['name'],
+    });
+  }, [TablerIcons]);
 
-  const paginatedIcons = filteredIcons.slice(
+  const results = (
+    debouncedSearchTerm
+      ? fuse.search(debouncedSearchTerm)
+      : TablerIcons.map((name,i ) => ({ item: name, refIndex: i }))
+  ) satisfies FuseResult<string>[];
+  
+  const iconCount = results.length;
+
+  const paginatedIcons = results.slice(
     (page - 1) * ITEMS_PER_PAGE,
     page * ITEMS_PER_PAGE
   );
@@ -172,21 +183,12 @@ function App() {
               alignItems='center'
               flexWrap='wrap'
               width='100%'>
-              <>
-                {activeLibrary.name === 'Vanilla' ? (
-                  <VanillaIconsGrid
-                    paginatedIcons={paginatedIcons}
-                    tablerIcons={tablerIconsVanilla}
-                    handleCopy={handleCopy}
-                  />
-                ) : (
-                  <ReactIconsGrid
-                    paginatedIcons={paginatedIcons}
-                    tablerIcons={tablerIcons}
-                    handleCopy={handleCopy}
-                  />
-                )}
-              </>
+              <IconGrid
+                searchTerm={debouncedSearchTerm}
+                paginatedIcons={paginatedIcons}
+                handleCopy={handleCopy}
+                tablerIcons={activeLibrary.name === 'Vanilla' ? tablerIconsVanilla : tablerIcons}
+              />
             </Stack>
           ) : (
             <Typography

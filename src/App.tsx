@@ -19,9 +19,9 @@ import * as tablerIconsVanilla from '@tabler/icons';
 import * as tablerIcons from '@tabler/icons-react';
 import { IconX } from '@tabler/icons-react';
 import { useDebounce } from '@uidotdev/usehooks';
-import React, { useMemo, useState } from 'react';
 import Fuse, { FuseResult } from 'fuse.js';
-import IconGrid from "./components/IconGrid";
+import React, { useMemo, useState } from 'react';
+import IconGrid from './components/IconGrid';
 
 const ITEMS_PER_PAGE = 25;
 
@@ -60,7 +60,7 @@ function App() {
     setTimeout(() => {
       setOpenSnack(false);
       setSnackMessage('');
-    }, 450);
+    }, 1000);
   };
 
   const handleClose = () => {
@@ -72,7 +72,7 @@ function App() {
     activeLibrary.name === 'Vanilla' ? tablerIconsVanilla : tablerIcons
   );
 
-  const fuse = useMemo(()=> {
+  const fuse = useMemo(() => {
     return new Fuse(TablerIcons, {
       includeScore: true,
       threshold: 0.25,
@@ -83,15 +83,14 @@ function App() {
   const results = (
     debouncedSearchTerm
       ? fuse.search(debouncedSearchTerm)
-      : TablerIcons.map((name,i ) => ({ item: name, refIndex: i }))
+      : TablerIcons.map((name, i) => ({ item: name, refIndex: i }))
   ) satisfies FuseResult<string>[];
-  
+
   const iconCount = results.length;
 
-  const paginatedIcons = results.slice(
-    (page - 1) * ITEMS_PER_PAGE,
-    page * ITEMS_PER_PAGE
-  );
+  const paginatedIcons = results
+    .slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE)
+    .filter(({ item }) => item !== 'createReactComponent');
 
   return (
     <Container
@@ -187,7 +186,11 @@ function App() {
                 searchTerm={debouncedSearchTerm}
                 paginatedIcons={paginatedIcons}
                 handleCopy={handleCopy}
-                tablerIcons={activeLibrary.name === 'Vanilla' ? tablerIconsVanilla : tablerIcons}
+                tablerIcons={
+                  activeLibrary.name === 'Vanilla'
+                    ? tablerIconsVanilla
+                    : tablerIcons
+                }
               />
             </Stack>
           ) : (
@@ -218,7 +221,11 @@ function App() {
           )}
         </Grid>
       </Grid>
-      <Box sx={{ width: 500 }}>
+
+      <Box
+        sx={{
+          width: 500,
+        }}>
         <Snackbar
           anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
           open={openSnack}

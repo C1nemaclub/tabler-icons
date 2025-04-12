@@ -17,6 +17,7 @@
     "@mui/material": "^5.16.0",
     "@tabler/icons": "^1.119.0",
     "@tabler/icons-react": "^2.14.0",
+    "@tabler/icons-react-alias": "npm:@tabler/icons-react@^3.31.0",
     "@types/react-window": "^1.8.8",
     "@uidotdev/usehooks": "^2.4.1",
     "fuse.js": "^7.0.0",

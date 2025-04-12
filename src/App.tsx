@@ -15,24 +15,30 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
-import * as tablerIconsVanilla from '@tabler/icons';
-import * as tablerIcons from '@tabler/icons-react';
 import { IconX } from '@tabler/icons-react';
 import { useDebounce } from '@uidotdev/usehooks';
 import Fuse, { FuseResult } from 'fuse.js';
 import React, { useMemo, useState } from 'react';
 import IconGrid from './components/IconGrid';
+import { getActiveLibraryIcons } from './utils/functions';
 
 const ITEMS_PER_PAGE = 25;
 
 const libOptions = [
   {
-    name: 'Vanilla',
+    name: '@tabler/icons',
+    label: 'Tabler Icons',
     version: '1.119.0',
   },
   {
-    name: 'React',
+    name: '@tabler/icons-react',
+    label: 'Tabler Icons React',
     version: '2.14.0',
+  },
+  {
+    name: '@tabler/icons-react-alias',
+    label: 'Tabler Icons React',
+    version: '3.31.0',
   },
 ];
 
@@ -41,10 +47,8 @@ function App() {
   const [page, setPage] = useState(1);
   const [openSnack, setOpenSnack] = useState(false);
   const [snackMessage, setSnackMessage] = useState('');
-  const [activeLibrary, setActiveLibrary] = useState({
-    name: 'Vanilla',
-    version: '1.119.0',
-  });
+  const [activeLibrary, setActiveLibrary] = useState(libOptions[0]);
+
   const debouncedSearchTerm = useDebounce(search, 300);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -68,9 +72,8 @@ function App() {
     setSnackMessage('');
   };
 
-  const TablerIcons = Object.keys(
-    activeLibrary.name === 'Vanilla' ? tablerIconsVanilla : tablerIcons
-  );
+  const tablerIcons = getActiveLibraryIcons(activeLibrary);
+  const TablerIcons = Object.keys(tablerIcons);
 
   const fuse = useMemo(() => {
     return new Fuse(TablerIcons, {
@@ -90,7 +93,7 @@ function App() {
 
   const paginatedIcons = results
     .slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE)
-    .filter(({ item }) => item !== 'createReactComponent');
+    .filter(({ item }) => item.startsWith('Icon'));
 
   return (
     <Container
@@ -113,18 +116,18 @@ function App() {
         </Typography>
       )}
       <Grid container columns={12} mt={4} columnSpacing={2}>
-        <Grid item xs={12} md={3} mb={2}>
+        <Grid item xs={12} md={4} mb={2}>
           <Autocomplete
             options={libOptions}
             size='small'
             value={activeLibrary}
             isOptionEqualToValue={(option, value) => option.name === value.name}
-            getOptionLabel={(option) => option.name}
+            getOptionLabel={(option) => option.label}
             renderOption={(props, option) => {
               return (
                 <ListItem {...props} key={option.name} disablePadding>
                   <ListItemText
-                    primary={option.name}
+                    primary={option.label}
                     secondary={option.version}
                   />
                 </ListItem>
@@ -147,7 +150,7 @@ function App() {
             }}
           />
         </Grid>
-        <Grid item xs={12} md={9}>
+        <Grid item xs={12} md={8}>
           <TextField
             size='small'
             variant='outlined'
@@ -186,11 +189,7 @@ function App() {
                 searchTerm={debouncedSearchTerm}
                 paginatedIcons={paginatedIcons}
                 handleCopy={handleCopy}
-                tablerIcons={
-                  activeLibrary.name === 'Vanilla'
-                    ? tablerIconsVanilla
-                    : tablerIcons
-                }
+                tablerIcons={tablerIcons}
               />
             </Stack>
           ) : (

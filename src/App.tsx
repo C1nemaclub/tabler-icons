@@ -15,7 +15,7 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
-import { IconX } from '@tabler/icons-react';
+import { IconBrandGithub, IconCheck, IconX } from '@tabler/icons-react';
 import { useDebounce } from '@uidotdev/usehooks';
 import Fuse, { FuseResult } from 'fuse.js';
 import React, { useMemo, useState } from 'react';
@@ -236,7 +236,7 @@ function App() {
                 gap={2}
                 alignItems='center'
                 justifyContent='center'>
-                <tablerIcons.IconCheck size={24} />
+                <IconCheck size={24} />
                 <Typography>{snackMessage}</Typography>
               </Stack>
             )
@@ -254,7 +254,7 @@ function App() {
             bottom: 20,
             right: 30,
           }}>
-          <tablerIcons.IconBrandGithub size={40} />
+          <IconBrandGithub size={40} />
         </IconButton>
       </Link>
     </Container>
